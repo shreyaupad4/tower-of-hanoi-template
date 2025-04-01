@@ -1,77 +1,43 @@
-public class TestSuite {
+public class TowerSolver {
+    private TowerModel model;
 
-    private boolean pass = false;
-    private int score = 0;
-    private int maxScore = 0;
-
-    public TestSuite()
-    {
+    // Constructors
+    public TowerSolver() {
+        // No initialization needed here; model will be set later.
     }
 
-    public void run()
-    {
-        System.out.println("Starting TestSuite");
-        pass = true;
-        score = 0;
-        maxScore = 0;
-
-        // Part 1: Model
-        TowerModel tiny = new TowerModel(2);
-        // Check height
-        expectEqual(tiny.getHeight(), 2, "height should be 1");
-
-        IntegerStack[] towers = tiny.getTowers();
-        // Check initial state
-        expectEqual(towers[0].get(0), 2, "tower0 should contain 2");
-
-        // Move a disk
-        tiny.move(0, 2);
-
-        // Check that move succeeded.
-        expectEqual(towers[2].get(0), 1, "disk 1 should move to tower2");
-
-        // Illegal move
-        tiny.move(0, 2);
-
-        // Check that move failed.
-        expectEqual(towers[2].get(1), 0, "disk 2 should not have moved");
-
-        // Part 2: Solver
-        TowerModel hanoi = new TowerModel(3);
-        towers = hanoi.getTowers();
-        // Check initial state
-        expectEqual(towers[0].get(0), 3, "tower0 should have disk 3 on bottom");
-        expectEqual(towers[2].get(0), 0, "tower2 should have zero disks");
-
-        // Construct a solver and solve the tower
-        TowerSolver solver = new TowerSolver();
-        solver.solve(hanoi);
-
-        // Check results
-        expectEqual(towers[0].get(0), 0, "tower0 should have zero disks");
-        expectEqual(towers[2].get(0), 3, "tower2 should have disk 3 on bottom");
-
-        if (pass == true)
-        {
-            System.out.println("--- TEST PASSED! Congrats! Score: " + score + "/" + maxScore + " ---");
-        }
-        else
-        {
-            System.out.println("--- TEST FAILED! :( Score: " + score + "/" + maxScore + " ---");
-        }
+    public TowerSolver(TowerModel model) {
+        this.model = model;
     }
 
-    private void expectEqual(int value, int expected, String note)
-    {
-        maxScore += 1;
-        if (value != expected)
-        {
-            System.out.println("Value: " + value + " != " + expected + ", " + note);
-            pass = false;
-        }
-        else
-        {
-            score += 1;
-        }
+    // Public solve method that sets the model if provided
+    public void solve(TowerModel model) {
+        this.model = model;
+        solveHanoi(model.getHeight(), 0, 2, 1); // Start solving with 3 towers: 0 (source), 2 (destination), 1 (auxiliary)
+    }
+
+    // Recursive method to solve Tower of Hanoi
+    private void solveHanoi(int numDisks, int source, int destination, int auxiliary) {
+        if (numDisks == 0) return; // Base case: no disks to move
+
+        // Move (n-1) disks from source to auxiliary using destination as buffer
+        solveHanoi(numDisks - 1, source, auxiliary, destination);
+
+        // Move the nth disk directly from source to destination
+        moveDisk(source, destination);
+
+        // Move (n-1) disks from auxiliary to destination using source as buffer
+        solveHanoi(numDisks - 1, auxiliary, destination, source);
+    }
+
+    // Moves a disk and updates the model
+    private void moveDisk(int source, int destination) {
+        System.out.println("Move from tower " + source + " to tower " + destination);
+        model.move(source, destination);
+    }
+
+    // Setter method for model
+    public void setModel(TowerModel model) {
+        this.model = model;
     }
 }
